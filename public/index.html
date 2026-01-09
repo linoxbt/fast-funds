@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wallet Hunter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-slate-900 to-indigo-900 min-h-screen text-white p-8">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-5xl font-black mb-8 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            🚀 Wallet Hunter Pro
+        </h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 p-8 bg-black/30 rounded-2xl backdrop-blur-xl">
+            <div>
+                <div id="checked" class="text-4xl font-black text-green-400 mb-2">0</div>
+                <div class="opacity-75">Wallets Checked</div>
+            </div>
+            <div>
+                <div id="hits" class="text-4xl font-black text-red-400 mb-2">0</div>
+                <div class="opacity-75">🎉 Hits Found</div>
+            </div>
+            <div>
+                <div id="status" class="text-2xl font-bold">⏳ Loading...</div>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <button id="startBtn" class="px-12 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-emerald/50 transition-all">
+                🚀 Start Hunting
+            </button>
+            <button id="stopBtn" class="px-12 py-4 bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-600 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-red/50 transition-all opacity-50" disabled>
+                ⏹️ Stop
+            </button>
+        </div>
+
+        <div id="log" class="bg-black/50 p-6 rounded-2xl font-mono text-sm max-h-48 overflow-y-auto text-left opacity-90">
+            Initializing... <span id="timestamp"></span>
+        </div>
+    </div>
+
+    <script>
+        const els = {
+            checked: document.getElementById('checked'),
+            hits: document.getElementById('hits'),
+            status: document.getElementById('status'),
+            log: document.getElementById('log')
+        };
+
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/stats');
+                if (!res.ok) throw new Error('API error');
+                const stats = await res.json();
+                
+                els.checked.textContent = stats.checked?.toLocaleString() || 0;
+                els.hits.textContent = stats.hits || 0;
+                els.status.textContent = stats.running ? '🟢 LIVE' : '🔴 STOPPED';
+            } catch (e) {
+                els.status.textContent = '❌ API Error';
+                log('Connection failed - check Vercel deployment');
+            }
+        }
+
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            els.log.innerHTML += `<div>[${time}] ${msg}</div>`;
+            els.log.scrollTop = els.log.scrollHeight;
+        }
+
+        document.getElementById('startBtn').onclick = async () => {
+            try {
+                const res = await fetch('/api/hunt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'start' })
+                });
+                if (res.ok) {
+                    log('🚀 Hunting started!');
+                    document.getElementById('startBtn').style.opacity = '0.5';
+                    document.getElementById('stopBtn').style.opacity = '1';
+                    document.getElementById('stopBtn').disabled = false;
+                }
+            } catch (e) {
+                log('❌ Start failed: ' + e.message);
+            }
+        };
+
+        document.getElementById('stopBtn').onclick = async () => {
+            try {
+                await fetch('/api/hunt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'stop' })
+                });
+                log('⏹️ Hunting stopped');
+                document.getElementById('startBtn').style.opacity = '1';
+                document.getElementById('stopBtn').style.opacity = '0.5';
+                document.getElementById('stopBtn').disabled = true;
+            } catch (e) {
+                log('❌ Stop failed');
+            }
+        };
+
+        // Auto-refresh every 3 seconds
+        fetchStats();
+        setInterval(fetchStats, 3000);
+    </script>
+</body>
+</html>
