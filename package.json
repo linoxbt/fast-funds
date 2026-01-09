@@ -1,0 +1,13 @@
+{
+  "name": "wallet-hunter",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "mnemonic": "^3.0.1",
+    "ethers": "^6.8.0",
+    "bitcoinjs-lib": "^6.1.6",
+    "axios": "^1.6.0"
+  }
+}
