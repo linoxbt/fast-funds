@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Hunter Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 min-h-screen text-white">
+    <div class="container mx-auto px-4 py-12 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <h1 class="text-6xl font-black bg-gradient-to-r from-yellow-400 via-pink-400 to-red-400 bg-clip-text text-transparent mb-4">
+                Wallet Hunter Pro
+            </h1>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                Real-time multi-chain wallet collision detector. 10+ blockchains. Telegram alerts.
+            </p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-white/40 transition-all group">
+                <div class="text-4xl font-black text-green-400 mb-2" id="checked">0</div>
+                <div class="text-lg font-semibold text-gray-300">Wallets Checked</div>
+                <div class="text-sm text-gray-500 mt-1" id="checkedRate">-- wallets/sec</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-white/40 transition-all group">
+                <div class="text-4xl font-black text-blue-400 mb-2" id="hits">0</div>
+                <div class="text-lg font-semibold text-gray-300">Confirmed Hits</div>
+                <div class="text-sm text-gray-500 mt-1">Lifetime</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-white/40 transition-all group">
+                <div class="text-4xl font-black text-purple-400 mb-2" id="uptime">0h</div>
+                <div class="text-lg font-semibold text-gray-300">Uptime</div>
+                <div class="text-sm text-gray-500 mt-1" id="status">Stopped</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 hover:border-white/40 transition-all group">
+                <div class="text-4xl font-black text-orange-400 mb-2" id="chains">10+</div>
+                <div class="text-lg font-semibold text-gray-300">Chains</div>
+                <div class="text-sm text-gray-500 mt-1">Ethereum, BSC, Solana...</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="bg-white/5 backdrop-blur-xl rounded-3xl p-12 mb-12 border border-white/10">
+            <div class="flex flex-col lg:flex-row gap-6 items-center justify-center">
+                <button 
+                    id="startBtn" 
+                    hx-post="/api/start" 
+                    hx-trigger="click"
+                    hx-swap="none"
+                    class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-12 py-6 rounded-2xl font-black text-xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 flex items-center gap-3"
+                >
+                    <span>🚀</span>
+                    <span>Start Hunting</span>
+                </button>
+                <button 
+                    id="stopBtn"
+                    hx-post="/api/stop"
+                    hx-trigger="click"
+                    hx-swap="none"
+                    class="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white px-12 py-6 rounded-2xl font-black text-xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 opacity-75"
+                >
+                    ⏹️ Stop
+                </button>
+            </div>
+            <div id="statusMsg" class="text-center mt-8 text-lg font-semibold text-gray-300"></div>
+        </div>
+
+        <!-- Live Feed -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Recent Hits -->
+            <div class="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                    🎉 Recent Hits
+                    <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-semibold">Live</span>
+                </h2>
+                <div id="hitsFeed" class="space-y-4 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-white/5">
+                    <div class="text-gray-500 text-center py-12">No hits yet. Start hunting! 🚀</div>
+                </div>
+            </div>
+
+            <!-- Chains Status -->
+            <div class="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
+                <h2 class="text-2xl font-bold mb-6">🌐 Chain Status</h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl">
+                        <span>Ethereum</span>
+                        <span class="text-green-400 font-mono text-sm">✓ Live</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl">
+                        <span>BSC</span>
+                        <span class="text-green-400 font-mono text-sm">✓ Live</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl">
+                        <span>Solana</span>
+                        <span class="text-green-400 font-mono text-sm">✓ Live</span>
+                    </div>
+                    <!-- More chains... -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WebSocket Live Updates -->
+    <script>
+        const ws = new WebSocket(`wss://${location.host}/ws/stats`);
+        
+        ws.onmessage = (event) => {
+            const stats = JSON.parse(event.data);
+            updateStats(stats);
+        };
+
+        function updateStats(stats) {
+            document.getElementById('checked').textContent = stats.checked.toLocaleString();
+            document.getElementById('hits').textContent = stats.hits.toLocaleString();
+            document.getElementById('uptime').textContent = formatUptime(stats.uptime);
+            document.getElementById('status').textContent = stats.running ? '🟢 Running' : '🔴 Stopped';
+            document.getElementById('checkedRate').textContent = `${stats.speed.toLocaleString()} wallets/sec`;
+        }
+
+        function formatUptime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return `${h}h ${m}m`;
+        }
+
+        // Auto-refresh hits every 10s
+        setInterval(() => {
+            htmx.ajax('GET', '/api/hits', '#hitsFeed');
+        }, 10000);
+    </script>
+
+    <style>
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thumb-white\/20::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+        .scrollbar-track-white\/5::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+    </style>
+</body>
+</html>
