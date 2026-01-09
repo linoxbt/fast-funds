@@ -1,0 +1,6 @@
+.env
+__pycache__/
+*.pyc
+hits.json
+checkpoint.json
+node_modules/
