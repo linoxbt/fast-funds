@@ -1,0 +1,12 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+websockets==12.0
+mnemonic==0.20
+eth-account==0.9.0
+solders==0.18.1
+bitcoinlib==0.6.13
+requests==2.31.0
+aiohttp==3.9.1
+python-dotenv==1.0.0
+slowapi==0.1.9
